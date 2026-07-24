@@ -1,0 +1,110 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build project & run",
+            "type": "shell",
+            "command": "dotnet run",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "run project with --debug",
+            "type": "shell",
+            "command": "dotnet run -- --debug",
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+        {
+            "label": "build",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/Vidre.sln",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary;ForceNoAlign"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "publish-windows",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "publish",
+                "${workspaceFolder}/Vidre.sln",
+                "-c", "Release",
+                "-r", "win-x64",
+                "/p:PublishSingleFile=true",
+                "/p:SelfContained=true",
+                "/property:GenerateFullPaths=true",
+                "/p:IncludeNativeLibrariesForSelfContained=true",
+                "/p:PublishTrimmed=true"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "publish-linux",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "publish",
+                "${workspaceFolder}/Vidre.sln",
+                "-c", "Release",
+                "-r", "linux-x64",
+                "/p:PublishSingleFile=true",
+                "/p:SelfContained=true",
+                "/property:GenerateFullPaths=true",
+                "/p:IncludeNativeLibrariesForSelfContained=true",
+                "/p:PublishTrimmed=true"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "publish-macos",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "publish",
+                "${workspaceFolder}/Vidre.sln",
+                "-c", "Release",
+                "-r", "osx-x64",
+                "/p:PublishSingleFile=true",
+                "/p:SelfContained=true",
+                "/property:GenerateFullPaths=true",
+                "/p:IncludeNativeLibrariesForSelfContained=true",
+                "/p:PublishTrimmed=true"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "watch",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "watch",
+                "run",
+                "--project",
+                "${workspaceFolder}/Vidre.sln"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "publish",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "publish",
+                "${workspaceFolder}/Vidre.sln",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary;ForceNoAlign"
+            ],
+            "problemMatcher": "$msCompile"
+        }
+    ]
+}
