@@ -20,6 +20,7 @@ class AppContext : IDisposable
     private InputManager _inputManager = null!; // manages all kind of inputs
     private UIManager _uiManager = null!; // draws and manages UI elements
     private UITopBar _uiTopBar = null!; // previously inside uiManager
+    private UIStatusBar _uiStatusBar = null!;
     private ToolManager _toolManager = null!;
 
     public CanvasManager CanvasManager => _canvasManager;
@@ -28,6 +29,7 @@ class AppContext : IDisposable
     public InputManager InputManager => _inputManager;
     public UIManager UIManager => _uiManager;
     public UITopBar UITopBar => _uiTopBar;
+    public UIStatusBar UIStatusBar => _uiStatusBar;
     public ToolManager ToolManager => _toolManager;
 
     // shortcuts
@@ -52,30 +54,20 @@ class AppContext : IDisposable
         _keybinds = new Keybinds(this);
 
         // ui init
+        _uiTopBar = new(_keybinds); // _keybinds is passed instead of 'this' because it's only used in the constructor
+        _uiStatusBar = new(this);
         _uiManager = new UIManager(window.FramebufferSize, this);
-        _uiTopBar = new(_keybinds); // _keybinds is passed instead of this because it's only used in the constructor
 
         _camera.Focus(); // focus camera in center, must be done after UIManager is initialized
 
-        // create manager of input events
-        _inputManager = new InputManager(this);
-        
         // actual input init
         input = window.CreateInput();
-        var keyboard = input.Keyboards[0];
-        var mouse = input.Mice[0];
-        
-        keyboard.KeyDown += _inputManager.OnKeyDown;
-        keyboard.KeyUp += _inputManager.OnKeyUp;
-        keyboard.KeyChar += _inputManager.OnKeyChar;
 
-        mouse.MouseDown += _inputManager.OnMouseDown;
-        mouse.MouseUp += _inputManager.OnMouseUp;
-        mouse.MouseMove += _inputManager.OnMouseMove;
-        mouse.Scroll += _inputManager.OnMouseScroll;
+        // create manager of input events
+        // the constructor also sets up event handlers related to keyboard and mouse
+        _inputManager = new InputManager(this, input);
 
         // after everything, load the image at arg[0] from command line:
-
         if (Program.ImageToOpen != null)
             if (_canvasManager.OpenFileAsCanvas(Program.ImageToOpen))
             {
@@ -95,6 +87,7 @@ class AppContext : IDisposable
         _inputManager.Dispose();
         _uiManager.Dispose();
         _uiTopBar.Dispose();
+        _uiStatusBar.Dispose();
         _toolManager.Dispose();
         _keybinds.Dispose();
     }

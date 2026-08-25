@@ -5,7 +5,7 @@ namespace Vidre.src.UI;
 
 class UITopBar : IDisposable // sorta of UIComponent
 {
-    private static readonly SKPaint TopBarPaint = new(); // shared
+    private static readonly SKPaint MainPaint = new(); // shared
 
     private readonly string[] topBarNames;
     private readonly SKRect[] topBarRects;
@@ -114,19 +114,20 @@ class UITopBar : IDisposable // sorta of UIComponent
     public void DrawTopBar(SKCanvas r)
     {
         // draw main top bar
-        TopBarPaint.Color = Config.AppTopBarColor;
-        r.DrawRect(topBarMainRect, TopBarPaint);
+        MainPaint.Color = Config.AppTopBarColor;
+        r.DrawRect(topBarMainRect, MainPaint);
 
         // draw texts
         UIManager.MainTextFont.Size = 16f;
+        UIManager.MainTextPaint.Color = SKColors.White;
 
         for (int i = 0; i < topBarNames.Length; i++)
         {
             // highlight if selected
             if (selectedTopBarMenu == i)
             {
-                TopBarPaint.Color = Config.AppUIsSelectedColor;
-                r.DrawRect(topBarRects[i], TopBarPaint);
+                MainPaint.Color = Config.AppUIsSelectedColor;
+                r.DrawRect(topBarRects[i], MainPaint);
             }
 
             // center vertically (approx.) and horizontally
@@ -138,7 +139,7 @@ class UITopBar : IDisposable // sorta of UIComponent
     {
         // draw selected menu dropdown separately from DrawTopBar, because it must be on top of floating windows
         if (selectedTopBarMenu != -1)
-            topBarDropdowns[selectedTopBarMenu].Draw(r, TopBarPaint);
+            topBarDropdowns[selectedTopBarMenu].Draw(r, MainPaint);
     }
 
     #region Events
@@ -202,6 +203,6 @@ class UITopBar : IDisposable // sorta of UIComponent
 
     public void Dispose()
     {
-        TopBarPaint.Dispose();
+        MainPaint.Dispose();
     }
 }

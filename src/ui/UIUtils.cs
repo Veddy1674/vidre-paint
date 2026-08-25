@@ -48,6 +48,7 @@ static class UIUtils
         float textY = y + (height / 2f) - (textFont.Metrics.Ascent + textFont.Metrics.Descent) / 2f;
 
         textFont.Size = 14f;
+        UIManager.MainTextPaint.Color = SKColors.White;
         r.DrawText(text, x + width / 2f, textY, SKTextAlign.Center, textFont, UIManager.MainTextPaint);
     }
 
@@ -82,6 +83,8 @@ static class UIUtils
         // center vertically
         float textY = y + (height / 2f) - (textFont.Metrics.Ascent + textFont.Metrics.Descent) / 2f;
 
+        textFont.Size = 14f;
+        UIManager.MainTextPaint.Color = SKColors.White;
         r.DrawText(text, x + 4, textY, SKTextAlign.Left, textFont, UIManager.MainTextPaint);
 
         if (offsetSpace == 0) return;

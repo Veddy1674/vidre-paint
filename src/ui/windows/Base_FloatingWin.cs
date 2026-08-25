@@ -98,6 +98,7 @@ abstract class FloatingWin
 
         // title on header
         UIManager.MainTextFont.Size = TitleSize;
+        UIManager.MainTextPaint.Color = SKColors.White;
         
         if (CenterTitleHorizontally)
             r.DrawText(Title, HeaderRect.Left + (HeaderRect.Width / 2f), HeaderRect.Top + 18, SKTextAlign.Center, UIManager.MainTextFont, UIManager.MainTextPaint);

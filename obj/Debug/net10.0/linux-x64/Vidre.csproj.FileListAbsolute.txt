@@ -219,3 +219,4 @@
 /home/anton/Downloads/projects/Vidre/obj/Debug/net10.0/linux-x64/Vidre.pdb
 /home/anton/Downloads/projects/Vidre/obj/Debug/net10.0/linux-x64/Vidre.genruntimeconfig.cache
 /home/anton/Downloads/projects/Vidre/obj/Debug/net10.0/linux-x64/ref/Vidre.dll
+/home/anton/Downloads/projects/Vidre/obj/Debug/net10.0/linux-x64/Vidre.sourcelink.json

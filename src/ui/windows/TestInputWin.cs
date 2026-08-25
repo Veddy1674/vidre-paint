@@ -80,6 +80,9 @@ class TestInputWin(SKRectI screen) : FloatingWin(screen,
             paint.IsAntialias = false;
 
             // draw unselectable "#" before text input
+            UIManager.MainTextFont.Size = 14f;
+            UIManager.MainTextPaint.Color = SKColors.White;
+            
             var y = wholeRect.MidY - (UIManager.MainTextFont.Metrics.Ascent + UIManager.MainTextFont.Metrics.Descent) / 2; // centered
             r.DrawText("#", wholeRect.Left + 5, y, SKTextAlign.Left, UIManager.MainTextFont, UIManager.MainTextPaint);
 

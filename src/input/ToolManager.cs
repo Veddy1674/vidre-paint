@@ -1,4 +1,5 @@
 using SkiaSharp;
+using Silk.NET.Input;
 using Vidre.src.canvas;
 using Vidre.src.input.tools;
 
@@ -12,6 +13,7 @@ enum EnumTool
     Eraser = 3,
     Selection = 4,
     EyeDropper = 5,
+    CanvasResizer = 6,
 }
 
 class ToolManager : IDisposable
@@ -78,6 +80,7 @@ class ToolManager : IDisposable
         AllTools[(int)EnumTool.Eraser] = new EraserTool(this);
         AllTools[(int)EnumTool.Selection] = new RectSelectionTool(this, AppContext);
         AllTools[(int)EnumTool.EyeDropper] = new EyeDropperTool(this, AppContext);
+        AllTools[(int)EnumTool.CanvasResizer] = new CanvasResizerTool(this, AppContext);
     }
 
     public void SetActiveTool(EnumTool tool)
@@ -86,13 +89,23 @@ class ToolManager : IDisposable
         if (Canvas != null && Canvas.FloatingExists && GetActiveTool() == EnumTool.Drag && tool == EnumTool.Selection)
             Canvas.MergeFloatingToMain();
 
+        // call OnDeselect for the previous tool
+        if (Canvas != null && ActiveTool != null) // (ActiveTool is null when SetActiveTool is called for the first time for the default tool)
+            ActiveTool.OnDeselect(Canvas);
+
         ActiveToolIndex = (int)tool;
         ActiveTool = AllTools[ActiveToolIndex];
 
-        // setup paint settings - edit: no more needed as every tool got its own paint, but this might come up useful for initialization
-        // ActiveTool.OnSelect();
-
-        // TODO: set cursor icon
+        // call OnSelect for the new tool
+        if (Canvas != null)
+        {
+            ActiveTool.OnSelect(Canvas);
+            
+            // (InputManager is null when SetActiveTool is called the first time for the default tool)
+            // reset cursor to default arrow!
+            if (AppContext.InputManager?.MainMouse != null)
+                AppContext.InputManager.MainMouse.Cursor.StandardCursor = StandardCursor.Arrow;
+        }
     }
 
     public EnumTool GetActiveTool()
@@ -124,7 +137,16 @@ class ToolManager : IDisposable
 
     public void OnMouseMove(bool leftDown, bool rightDown, SKPoint canvasPos)
     {
-        if ((!leftDown && !rightDown) || Canvas == null || !isInteracting) return;
+        if (Canvas == null) return;
+
+        if (!leftDown && !rightDown)
+        {
+            // No buttons pressed - call OnHover for hover detection
+            ActiveTool.OnHover(Canvas, canvasPos);
+            return;
+        }
+
+        if (!isInteracting) return;
 
         ActiveTool.OnMove(Canvas, canvasPos);
     }

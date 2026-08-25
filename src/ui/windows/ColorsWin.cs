@@ -785,6 +785,7 @@ class ColorsWin(SKRectI screen, ToolManager toolManager) : FloatingWin(screen,
 
             // draw RGB switch mode button text
             UIManager.MainTextFont.Size = 14f;
+            UIManager.MainTextPaint.Color = SKColors.White;
             r.DrawText(rgb ? "RGB" : "HSV", switchRect.MidX, switchRect.MidY + 5, SKTextAlign.Center, UIManager.MainTextFont, UIManager.MainTextPaint);
         }
 
@@ -796,6 +797,7 @@ class ColorsWin(SKRectI screen, ToolManager toolManager) : FloatingWin(screen,
 
             // draw textLetter (acceptably accurate offsets)
             UIManager.MainTextFont.Size = 14f;
+            UIManager.MainTextPaint.Color = SKColors.White;
             r.DrawText(textLetter, sliderRect.Left - 16, sliderRect.MidY + 5, SKTextAlign.Left, UIManager.MainTextFont, UIManager.MainTextPaint);
 
             paint.IsAntialias = true;
@@ -1154,6 +1156,7 @@ class ColorsWin(SKRectI screen, ToolManager toolManager) : FloatingWin(screen,
 
                 // draw "HEX" text on the left
                 UIManager.MainTextFont.Size = 14f;
+                UIManager.MainTextPaint.Color = SKColors.White;
                 r.DrawText("HEX", wholeRect.Left - 36, wholeRect.MidY + 5, SKTextAlign.Left, UIManager.MainTextFont, UIManager.MainTextPaint);
 
                 // draw unselectable "#" before text input

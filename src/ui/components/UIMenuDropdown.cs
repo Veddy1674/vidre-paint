@@ -171,6 +171,7 @@ class UIMenuDropdown // sorta of UIComponent
             float textY = y + itemHeight / 2 + 6;
 
             UIManager.MainTextFont.Size = textSize;
+            UIManager.MainTextPaint.Color = SKColors.White;
             r.DrawText(itemsDesc[i], x + itemHeight + distToIcon, textY, SKTextAlign.Left, UIManager.MainTextFont, UIManager.MainTextPaint);
             
             // draw shortcut text if valid

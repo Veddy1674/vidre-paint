@@ -99,6 +99,7 @@ class UITextInput : UIComponent
         }
 
         // draw text (on top of selection, no alpha needed)
+        UIManager.MainTextPaint.Color = SKColors.White;
         r.DrawText(CurrText, x, y, SKTextAlign.Left, font, UIManager.MainTextPaint);
 
         // draw blinking cursor (only when focused and no selection, or while selecting)

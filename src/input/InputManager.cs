@@ -14,9 +14,9 @@ public enum Modifier : byte
     Alt = 4
 }
 
-class InputManager(AppContext context) : IDisposable
+class InputManager : IDisposable
 {
-    private readonly AppContext AppContext = context;
+    private readonly AppContext AppContext;
     private Camera Camera => AppContext.Camera;
     private UIManager UIManager => AppContext.UIManager;
     private ToolManager ToolManager => AppContext.ToolManager;
@@ -37,6 +37,26 @@ class InputManager(AppContext context) : IDisposable
     private Key? pressingKey = null;
     private double keyTimer = 0;
     private bool isKeyRepeating = false;
+
+    public IKeyboard MainKeyboard { get; private set; }
+    public IMouse MainMouse { get; private set; }
+
+    public InputManager(AppContext context, IInputContext input)
+    {
+        this.AppContext = context;
+
+        this.MainKeyboard = input.Keyboards[0];
+        this.MainMouse = input.Mice[0];
+        
+        MainKeyboard.KeyDown += OnKeyDown;
+        MainKeyboard.KeyUp += OnKeyUp;
+        MainKeyboard.KeyChar += OnKeyChar;
+
+        MainMouse.MouseDown += OnMouseDown;
+        MainMouse.MouseUp += OnMouseUp;
+        MainMouse.MouseMove += OnMouseMove;
+        MainMouse.Scroll += OnMouseScroll;
+    }
     
     public void OnKeyDown(IKeyboard keyboard, Key key, int scancode)
     {

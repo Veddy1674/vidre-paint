@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Vidre")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+629f7b89265ef773298ca0ea0f6a8f6206a3bbb6")]
 [assembly: System.Reflection.AssemblyProductAttribute("Vidre")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Vidre")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

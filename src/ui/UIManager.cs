@@ -13,6 +13,7 @@ class UIManager : IDisposable
     public readonly AppContext AppContext;
     
     private UITopBar UITopBar => AppContext.UITopBar; // implements IDisposable
+    private UIStatusBar UIStatusBar => AppContext.UIStatusBar; // implements IDisposable
 
     // only floating windows such as Colors, Tools...
     private readonly List<FloatingWin> AllWindows = [];
@@ -52,6 +53,9 @@ class UIManager : IDisposable
             // call init for each window
             AllWindows[i].Init(Screen, GlobalPaints[i]);
         }
+
+        // initialize status bar
+        UIStatusBar.CalcStatusBar(Screen);
     }
 
     public void DrawAll(SKCanvas r, double dt)
@@ -65,6 +69,9 @@ class UIManager : IDisposable
         
         // draw top bar dropdowns on top of everything
         UITopBar.DrawDropdown(r);
+
+        // draw status bar
+        UIStatusBar.DrawStatusBar(r);
     }
 
     public void OnWinResize(int width, int height)
@@ -73,6 +80,9 @@ class UIManager : IDisposable
 
         // recalc topBar
         UITopBar.CalcTopBar(Screen);
+
+        // recalc status bar
+        UIStatusBar.CalcStatusBar(Screen);
 
         // TODO recalc windows? - windows draw() have a boolean to check if they should recalc, but revise
     }
@@ -192,5 +202,6 @@ class UIManager : IDisposable
         MainTextFont.Dispose();
         MainTextPaint.Dispose();
         UITopBar.Dispose();
+        UIStatusBar.Dispose();
     }
 }

@@ -1,3 +1,4 @@
+using Silk.NET.Input;
 using SkiaSharp;
 using Vidre.src.canvas;
 using Vidre.src.input.cmdStack;
@@ -8,16 +9,16 @@ namespace Vidre.src.input.tools;
 class DragTool(ToolManager toolManager, AppContext context) : DrawTool(toolManager)
 {
     private InputManager InputManager => context.InputManager;
-    
-    private readonly SKPaint previewPaint = new()
-    {
-        Style = SKPaintStyle.Stroke,
-        IsAntialias = true,
-        StrokeWidth = 0.04f,
-    };
 
     private SKPoint startPoint;
     private bool isDragging = false;
+
+    public override void OnSelect(Canvas canvas)
+    {
+        // if there's anything selected, set cursor to crosshair (4 arrows)
+        if (canvas.HasCommittedSelection)
+            InputManager.MainMouse.Cursor.StandardCursor = StandardCursor.Crosshair;
+    }
 
     // for undo/redo
     private int totalDx = 0;
@@ -69,15 +70,5 @@ class DragTool(ToolManager toolManager, AppContext context) : DrawTool(toolManag
             var dragStepAction = new UndoDrag(totalDx, totalDy);
             canvas.UndoManager.PushAction(dragStepAction);
         }
-    }
-
-    public override void OnDraw(SKCanvas r, SKPoint canvasPos)
-    {
-        // TODO: draw cursor NOTE delete previewPaint if not needed
-    }
-
-    public override void Dispose()
-    {
-        previewPaint.Dispose();
     }
 }
