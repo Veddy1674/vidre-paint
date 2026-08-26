@@ -120,6 +120,9 @@ class UIManager : IDisposable
                 return true;
             }
         }
+
+        if (UIStatusBar.OnMouseDown(leftDown, rightDown, mousePos))
+            return true;
         
         return false;
     }
@@ -132,6 +135,9 @@ class UIManager : IDisposable
             return true;
         
         // no topBar mouseup event!
+
+        if (UIStatusBar.OnMouseUp(leftDown, rightDown, mousePos))
+            return true;
         
         return false;
     }
@@ -150,6 +156,9 @@ class UIManager : IDisposable
                     if (win.OnMouseMove(leftDown, rightDown, lastMousePos, mousePos)) return true;
         
         if (UITopBar.OnMouseMove(leftDown, rightDown, lastMousePos, mousePos))
+            return true;
+        
+        if (UIStatusBar.OnMouseMove(leftDown, rightDown, lastMousePos, mousePos))
             return true;
 
         return false;

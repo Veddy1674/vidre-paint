@@ -57,6 +57,9 @@ class UIStatusBar(AppContext context) : IDisposable
 
     public bool OnMouseDown(bool leftDown, bool rightDown, SKPoint mousePos)
     {
+        if (statusRect.Contains(mousePos))
+            return true;
+        
         return false;
     }
 
