@@ -245,7 +245,7 @@ sealed class Canvas : IDisposable
 
     // static because it's a visual effect
     public static bool ShowGrid { get; private set; } = false;
-    public static int GridSkip { get; private set; } = 1;
+    public static int GridPadding { get; private set; } = 1;
 
     public static SKPath? GridPath { get; private set; }
 
@@ -266,12 +266,12 @@ sealed class Canvas : IDisposable
         
         GridPath = new SKPath();
 
-        for (int x = 0; x <= instance.Width; x += GridSkip) {
+        for (int x = 0; x <= instance.Width; x += GridPadding) {
             GridPath.MoveTo(x, 0);
             GridPath.LineTo(x, instance.Height);
         }
 
-        for (int y = 0; y <= instance.Height; y += GridSkip) {
+        for (int y = 0; y <= instance.Height; y += GridPadding) {
             GridPath.MoveTo(0, y);
             GridPath.LineTo(instance.Width, y);
         }
