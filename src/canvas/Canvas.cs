@@ -9,6 +9,10 @@ sealed class Canvas : IDisposable
     public int Width { get; private set; }
     public int Height { get; private set; }
 
+    // cached just in case it's called very often
+    // (manually updated when Width or Height change)
+    public float AspectRatio { get; private set; }
+
     public SKBitmap Bitmap { get; private set; } // the pixels
     public SKCanvas CanvasCtx { get; private set; } // context to draw in
 
@@ -44,12 +48,18 @@ sealed class Canvas : IDisposable
         FloatingExists && 
         (FloatingX != initialFloatingBounds.Left || FloatingY != initialFloatingBounds.Top);
     
-    // UIManager.MainTextFont and UIManager.MainTextPaint could be used, but just in case, to avoid troubles:
-    private static readonly SKFont SelectionInfoFont;
-    private static readonly SKPaint SelectionInfoPaint;
+    // font and paint with difference effect (e.g: colored white when background is black and viceversa)
+    private static readonly SKFont MainTextFont;
+    private static readonly SKPaint MainTextPaint;
 
     // the classic white and gray pattern to represent transparency
-    public readonly static SKPaint TransparencyPaint; // accessed by ColorsWin
+    public readonly static SKPaint TransparencyPaint;
+
+    // a paint made to look exactly like the background color, used elsewhere (e.g: CanvasResizerTool.cs)
+    public readonly static SKPaint AppBGColorPaint = new()
+    {
+        Color = Config.AppBGColor
+    };
 
     // dotted-looking selection
     public readonly static SKPaint SelectionPaint;
@@ -87,8 +97,8 @@ sealed class Canvas : IDisposable
         };
 
         // init font and text
-        SelectionInfoFont = new SKFont(SKTypeface.Default, 13f);
-        SelectionInfoPaint = new SKPaint
+        MainTextFont = new SKFont(SKTypeface.Default, 13f);
+        MainTextPaint = new SKPaint
         {
             Style = SKPaintStyle.Fill,
             IsAntialias = false,
@@ -104,6 +114,7 @@ sealed class Canvas : IDisposable
 
         Width = width;
         Height = height;
+        AspectRatio = (float)Width / Height;
 
         Bitmap = new SKBitmap(width, height, SKColorType.Rgba8888, SKAlphaType.Premul);
         CanvasCtx = new SKCanvas(Bitmap);
@@ -119,6 +130,7 @@ sealed class Canvas : IDisposable
 
         Width = bitmap.Width;
         Height = bitmap.Height;
+        AspectRatio = (float)Width / Height;
 
         Bitmap = bitmap;
         CanvasCtx = new SKCanvas(Bitmap);
@@ -141,7 +153,10 @@ sealed class Canvas : IDisposable
     public SKData Encode(SKEncodedImageFormat format, int quality)
         => Bitmap.Encode(format, quality);
 
-    public void CropToRect(SKRectI bounds)
+    // "Canvas" to differentiate it by ResizeImage (which uses interpolation and such)
+    // meanwhile this simply adjusts the canvas dimensions without affecting the bitmap (other than eventually cropping it)
+    // this method ALWAYS puts transparency on the newly added area
+    public void ResizeCanvas(SKRectI bounds)
     {
         int newWidth = bounds.Width;
         int newHeight = bounds.Height;
@@ -149,7 +164,10 @@ sealed class Canvas : IDisposable
         var newBitmap = new SKBitmap(newWidth, newHeight, SKColorType.Rgba8888, SKAlphaType.Premul);
         using var newCanvas = new SKCanvas(newBitmap);
 
-        // copia solo la porzione dentro newBounds
+        // clear the new canvas with transparency!
+        newCanvas.Clear(SKColors.Empty);
+
+        // only copy the visible part of the bitmap to the new canvas
         newCanvas.DrawBitmap(Bitmap, -bounds.Left, -bounds.Top);
 
         Bitmap.Dispose();
@@ -281,15 +299,26 @@ sealed class Canvas : IDisposable
         if (previewSelection.IsEmpty) return;
 
         var bounds = previewSelection.Bounds;
-        string sizeText = $"{bounds.Width}x{bounds.Height}";
+        string text = $"{bounds.Width}x{bounds.Height}";
         
         var canvasPoint = new SKPoint(bounds.Right, bounds.Top);
-        var screenPoint = camera.CamMatrix.MapPoint(canvasPoint);
+        var screenPoint = camera.CanvasToScreenPos(canvasPoint);
 
         float textX = screenPoint.X + 6f;
         float textY = screenPoint.Y - 6f;
 
-        r.DrawText(sizeText, textX, textY, SelectionInfoFont, SelectionInfoPaint);
+        DrawTextScreenSpace(r, text, textX, textY);
+    }
+
+    // to draw any text in SCREEN SPACE using Canvas.MainTextFont with the difference effect
+    public static void DrawTextScreenSpace(SKCanvas r, string text, float x, float y, SKTextAlign textAlign = SKTextAlign.Left)
+    {
+        r.Save();
+        r.ResetMatrix(); // to make sure it's being drawn in screen space
+
+        r.DrawText(text, x, y, textAlign, MainTextFont, MainTextPaint); // draw
+
+        r.Restore();
     }
 
     #region selection on canvas
@@ -390,30 +419,7 @@ sealed class Canvas : IDisposable
             r.DrawPath(path, SelectionFillPaint);
         }
 
-        // higher values make the selection look thicker
-        const float selectionVisualSize = 3f;
-
-        // higher values make the "dots" (color1) look longer (like rectangles, whereas 1f makes them look like squares/dots)
-        const float dotsLength = 2f;
-
-        // changing stroke width dynamically
-        float strokeWidth = selectionVisualSize / camera.CurrentZoom;
-        float dotSize = strokeWidth * dotsLength;
-        SelectionPaint.StrokeWidth = strokeWidth;
-
-        // still outline
-        SelectionPaint.PathEffect = null;
-        SelectionPaint.Color = Config.SelectionColor1;
-        r.DrawPath(path, SelectionPaint);
-
-        // animated outline
-        _dashIntervals[0] = strokeWidth;
-        _dashIntervals[1] = dotSize;
-
-        using var dashEffect = SKPathEffect.CreateDash(_dashIntervals, dashOffset -= 0.02f * dotSize); // high value = faster anim
-        SelectionPaint.PathEffect = dashEffect;
-        SelectionPaint.Color = Config.SelectionColor2;
-        r.DrawPath(path, SelectionPaint);
+        DrawSelectionOutline(r, camera, path);
 
         // draw outline of deselection
         if (!currentDeselectionRect.IsEmpty)
@@ -432,19 +438,7 @@ sealed class Canvas : IDisposable
                 r.DrawPath(deselFillPath, SelectionFillPaint);
             }
 
-            // whole deselection area
-            using var deselPath = new SKPath();
-            deselPath.AddRect(currentDeselectionRect);
-
-            // still outline
-            SelectionPaint.PathEffect = null;
-            SelectionPaint.Color = Config.SelectionColor1;
-            r.DrawPath(deselPath, SelectionPaint);
-
-            // animated outline
-            SelectionPaint.PathEffect = dashEffect;
-            SelectionPaint.Color = Config.SelectionColor2;
-            r.DrawPath(deselPath, SelectionPaint);
+            DrawSelectionOutline(r, camera, currentDeselectionRect);
         }
         // the second condition makes it so the fill color is the default one (blue) instead of additional one (green)
         // in the case where it's the first selection and ctrl is being pressed (makes no sense visually, everything is being added anyways)
@@ -464,20 +458,43 @@ sealed class Canvas : IDisposable
                 r.DrawPath(addselFillPath, SelectionFillPaint);
             }
 
-            // whole selection area
-            using var addselPath = new SKPath();
-            addselPath.AddRect(currentAdditionalRect);
-
-            // still outline
-            SelectionPaint.PathEffect = null;
-            SelectionPaint.Color = Config.SelectionColor1;
-            r.DrawPath(addselPath, SelectionPaint);
-
-            // animated outline
-            SelectionPaint.PathEffect = dashEffect;
-            SelectionPaint.Color = Config.SelectionColor2;
-            r.DrawPath(addselPath, SelectionPaint);
+            DrawSelectionOutline(r, camera, currentAdditionalRect);
         }
+    }
+
+    // used in DrawSelection but also externally, e.g: in CanvasResizerTool.cs
+    public void DrawSelectionOutline(SKCanvas r, Camera camera, SKPath path)
+    {
+        const float selectionVisualSize = 3f;
+        const float dotsLength = 2f;
+
+        float strokeWidth = selectionVisualSize / camera.CurrentZoom;
+        float dotSize = strokeWidth * dotsLength;
+
+        SelectionPaint.StrokeWidth = strokeWidth;
+
+        _dashIntervals[0] = strokeWidth;
+        _dashIntervals[1] = dotSize;
+
+        using var dashEffect = SKPathEffect.CreateDash(_dashIntervals, dashOffset -= 0.02f * dotSize);
+
+        // still outline
+        SelectionPaint.PathEffect = null;
+        SelectionPaint.Color = Config.SelectionColor1;
+        r.DrawPath(path, SelectionPaint);
+
+        // animated outline
+        SelectionPaint.PathEffect = dashEffect;
+        SelectionPaint.Color = Config.SelectionColor2;
+        r.DrawPath(path, SelectionPaint);
+    }
+
+    // overload to convert SKRectI to a temporary SKPath
+    public void DrawSelectionOutline(SKCanvas r, Camera camera, SKRectI rect)
+    {
+        using var path = new SKPath();
+        path.AddRect(rect);
+        DrawSelectionOutline(r, camera, path);
     }
 
     private SKRectI initialFloatingBounds; // to save bounds
@@ -816,6 +833,8 @@ sealed class Canvas : IDisposable
         
         Width = Bitmap.Width;
         Height = Bitmap.Height;
+
+        AspectRatio = (float)Width / Height; // recalc
 
         _tempCanvasCtx?.Dispose();
         _tempBitmap?.Dispose();

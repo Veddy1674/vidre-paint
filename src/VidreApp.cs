@@ -46,6 +46,7 @@ sealed class VidreApp : IDisposable
         window.FramebufferResize += OnWinResize;
         window.Render += OnRender;
         window.Closing += OnClose;
+        window.FileDrop += OnFileDrop;
     }
 
     public void Run()
@@ -113,6 +114,12 @@ sealed class VidreApp : IDisposable
         AppContext.UIManager.OnWinResize(size.X, size.Y);
 
         AppContext.Camera.Focus();
+    }
+
+    // called when files are dropped onto the window
+    private void OnFileDrop(string[] files)
+    {
+        
     }
 
     #endregion

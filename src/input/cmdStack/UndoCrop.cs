@@ -25,7 +25,7 @@ class UndoCrop(Canvas canvas, Camera camera, SKRectI cropBounds) : UndoRedo
 
     public override void Redo(Canvas canvas)
     {
-        canvas.CropToRect(cropBounds);
+        canvas.ResizeCanvas(cropBounds);
         canvas.ClearAllSelection();
 
         camera.Focus();

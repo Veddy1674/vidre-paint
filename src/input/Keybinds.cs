@@ -206,6 +206,7 @@ class Keybinds
 
             #region File (0)
 
+            // TODO check if adding a AppContext.ToolManager.ReactivateActiveTool() call after undo/redo is okay and any useful
             case UndoAction:
                 if (canvas == null) return;
                 canvas.UndoManager.Undo();
@@ -339,7 +340,7 @@ class Keybinds
                 MoveSelection(canvas, 10, 0);
                 break;
             
-            case MoveCenterSelection: // drag the floating layer to center
+            case MoveCenterSelection: // drag the floating layer (with whatever was selected) to center
             {
                 if (canvas == null || !canvas.HasCommittedSelection) return;
                 
@@ -357,7 +358,7 @@ class Keybinds
                 break;
             }
             
-            case CenterSelection: // move selection to center
+            case CenterSelection: // move ONLY the selection to center (without affecting the image)
             {
                 if (canvas == null || !canvas.HasCommittedSelection || canvas.FloatingExists) return;
 
@@ -441,6 +442,8 @@ class Keybinds
 
                 canvas.UndoManager.PushAction(new UndoSelection(oldSel, canvas.CommittedSelection));
 
+                AppContext.ToolManager.SetActiveTool(EnumTool.Selection); // to avoid visual issues (and it makes sense)
+
                 break;
             }
 
@@ -457,7 +460,7 @@ class Keybinds
                 var bounds = canvas.CommittedSelection.Bounds; // to crop
                 var undoAction = new UndoCrop(canvas, AppContext.Camera, bounds);
 
-                canvas.CropToRect(bounds);
+                canvas.ResizeCanvas(bounds);
                 AppContext.Camera.Focus();
                 canvas.ClearAllSelection();
                 
@@ -482,13 +485,16 @@ class Keybinds
             case DuplicateSelection:
                 if (canvas == null || !canvas.HasCommittedSelection) return;
 
+                // TODO make undoable
                 canvas.DuplicateSelection();
 
                 break;
 
             // ctrl v
             case PasteFromClipboard:
-                canvas?.PasteFromClipboard();
+                // TODO make undoable
+                canvas?.PasteFromClipboard(); // pastes clipboard and selects it
+                AppContext.ToolManager.SetActiveTool(EnumTool.Selection); // to avoid visual issues (and it makes sense)
                 break;
             
             // ctrl i
@@ -510,7 +516,8 @@ class Keybinds
                 break;
             }
             
-            default: break;
+            default:
+                break;
         }
     }
 

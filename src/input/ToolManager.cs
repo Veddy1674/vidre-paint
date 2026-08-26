@@ -72,6 +72,8 @@ class ToolManager : IDisposable
 
     public void LoadAllTools()
     {
+        // TODO: automatize this in a for loop, create a static readonly "DefaultTool" set to brush
+
         // each index corresponds to EnumTool NOTE: the order must be exactly the same
         // everytime a new tool is added, it must be added to EnumTool too
         AllTools[(int)EnumTool.Drag] = new DragTool(this, AppContext);
@@ -83,6 +85,7 @@ class ToolManager : IDisposable
         AllTools[(int)EnumTool.CanvasResizer] = new CanvasResizerTool(this, AppContext);
     }
 
+    // the active tool can be reactivated (OnDeselect and OnSelect will be called)
     public void SetActiveTool(EnumTool tool)
     {
         // merge floating layer when switching from drag to selection
@@ -110,6 +113,12 @@ class ToolManager : IDisposable
 
     public EnumTool GetActiveTool()
         => (EnumTool)ActiveToolIndex;
+    
+    public void SetDefaultActiveTool()
+        => SetActiveTool(EnumTool.Brush);
+    
+    public void ReactivateActiveTool()
+        => SetActiveTool(GetActiveTool());
 
     private bool isInteracting = false;
 

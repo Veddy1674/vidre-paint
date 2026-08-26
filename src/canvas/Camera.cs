@@ -35,6 +35,12 @@ class Camera(AppContext context)
     
     public SKPoint ScreenToCanvasPos(SKPoint screenPos)
         => CamMatrix.Invert().MapPoint(screenPos).Floor(); // TODO optimize? e.g: save CamMatrix.Invert()
+    
+    public SKPoint CanvasToScreenPos(SKPoint canvasPos)
+        => CamMatrix.MapPoint(canvasPos); // not heavy operation
+    
+    public SKPoint CanvasToScreenPos(float x, float y) // overload
+        => CanvasToScreenPos(new SKPoint(x, y));
 
     public void Move(SKPoint delta)
     {
