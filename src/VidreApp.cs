@@ -119,7 +119,14 @@ sealed class VidreApp : IDisposable
     // called when files are dropped onto the window
     private void OnFileDrop(string[] files)
     {
+        if (files.Length == 0) return;
         
+        // only take the first file, TODO load multiple files in different canvases
+        string filePath = files[0];
+        
+        // open as canvas
+        if (AppContext.CanvasManager.OpenFileAsCanvas(filePath))
+            AppContext.Camera.Focus();
     }
 
     #endregion
