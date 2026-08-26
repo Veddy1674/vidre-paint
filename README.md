@@ -19,6 +19,13 @@ This software was developed in C# (.NET 10) with Silk.NET and SkiaSharp, and was
 
 As of now it includes most of the features found commonly in Raster painting software, but as it is incomplete, it still lacks some fundamental features for it to be able to fully replace any other painting software.
 
-I plan to keep developing it at a slow pace (as of now, I develop features only when I strictly need them) and eventually it will be a complete software.
+I plan to keep developing it at a slow pace (I develop features only when I strictly need them) and eventually it will be a complete software.
 
-Along with standard painting software features, I plan on adding specific tools meant for Machine Learning, perhaps a plugin system to allow custom tools and effects to be created
+Along with standard painting software features, I plan on adding specific tools meant for Machine Learning, and perhaps a plugin system to allow custom tools and effects to be created.
+
+## Info about usage:
+
+The first argument of the program can be the path of an image file to open on startup.  
+Thanks to this, you can set Vidre as your default image viewer, and as it is optimized for fast startups, it's a great way to quickly view images.
+
+When you run the software for the first time, a configuration file is created (Managed in [`Config.cs`](./src/Config.cs)) for future personalization purposes, alternatively the argument `--noconf` disables loading/saving for the session (thus temporarily runs the software with default settings).
