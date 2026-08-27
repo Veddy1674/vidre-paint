@@ -244,17 +244,18 @@ sealed class Canvas : IDisposable
     #region Grid management
 
     // static because it's a visual effect
-    public static bool ShowGrid { get; private set; } = false;
-    public static int GridPadding { get; private set; } = 1;
+    public static bool ShowGrid = false;
+    public static int GridPadding = 1;
 
     public static SKPath? GridPath { get; private set; }
 
     public static readonly SKPaint GridPaint = new()
     {
-        Color = new(0, 0, 0, 80),
+        Color = SKColors.White,
         Style = SKPaintStyle.Stroke,
         StrokeWidth = 0f,
-        IsAntialias = false
+        IsAntialias = false,
+        BlendMode = SKBlendMode.Difference
     };
 
     public static void UpdateGridPath(Canvas instance)
@@ -285,10 +286,22 @@ sealed class Canvas : IDisposable
 
     public static void DrawGrid(SKCanvas r, Camera camera)
     {
-        if (!ShowGrid || camera.CurrentZoom < 4f) return; // canvas too small, no sense to render grid (avoid Moiré effect)
+        if (!ShowGrid) return;
 
-        byte opacity = (byte)Math.Clamp((camera.CurrentZoom - 4f) * 15, 0, 80);
-        GridPaint.Color = new(0, 0, 0, opacity);
+        // cell size on screen
+        float cellSize = GridPadding * camera.CurrentZoom;
+
+        const float minCellSize = 6f;
+
+        // if lines are too close to each other (using arbitrary value), don't render them (avoids Moiré effect)
+        if (cellSize < minCellSize)
+            return;
+        
+        // smooth opacity
+        float opacityFactor = (cellSize - minCellSize) / 8f; 
+        byte intensity = (byte)Math.Clamp(opacityFactor * 128f, 0f, 128f);
+
+        GridPaint.Color = new SKColor(intensity, intensity, intensity, 255);
 
         r.DrawPath(GridPath, GridPaint);
     }
