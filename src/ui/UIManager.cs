@@ -38,6 +38,7 @@ class UIManager : IDisposable
         AllWindows.AddRange([
             new ColorsWin(Screen, context.ToolManager),
             new ToolsWin(Screen, context.ToolManager),
+            new GridWin(Screen, context),
             // new TestInputWin(Screen));
         ]);
 
