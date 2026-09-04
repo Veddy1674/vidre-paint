@@ -1,6 +1,6 @@
 <img width="202" height="83" alt="image" src="https://github.com/user-attachments/assets/fa007456-0df0-401e-9e1c-9d577d4887c0" />  
 
-A cross-platform lightweight and optimized Raster painting software built in C# as an alternative to Paint.NET *(which is only meant for Windows)*
+A cross-platform lightweight and optimized **raster** painting software built in C# as an alternative to Paint.NET *(which is only meant for Windows)*
 
 ![Progress](https://img.shields.io/badge/progress-20%25-orange)
 
